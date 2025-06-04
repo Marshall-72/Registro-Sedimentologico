@@ -61,7 +61,9 @@ if uploaded_file is not None:
     for i in range(1, len(data)):  # Comenzar desde el segundo estrato para marcar el contacto
         # Profundidad de contacto entre estratos (fin del estrato anterior)
         depth_contact = data.loc[i, 'Profundidad Inicio (m)']
-        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, f"{depth_contact} m", va='center', fontsize=10, color='black')
+        
+        # Colocamos la etiqueta unos centímetros más arriba
+        ax.text(-0.3, y_pos[i] + 0.1, f"{depth_contact} m", va='center', fontsize=10, color='black')  # Ajustamos la posición vertical
 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
