@@ -57,11 +57,11 @@ if uploaded_file is not None:
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
-    # Colocar las etiquetas de los contactos entre las barras (usando las profundidades de inicio y fin)
+    # Colocar las etiquetas de los contactos entre las barras en la parte más baja de cada barra
     for i, row in data.iterrows():
-        # Colocamos la etiqueta en el contacto entre las barras, utilizando la "Profundidad Fin (m)"
-        depth_end = row['Profundidad Fin (m)']
-        ax.text(fixed_length + 0.05, y_pos[i], f"{depth_end} m", va='center', fontsize=10, color='black')
+        # Colocamos la etiqueta en el contacto, utilizando la "Profundidad Inicio (m)"
+        depth_start = row['Profundidad Inicio (m)']
+        ax.text(-0.3, y_pos[i], f"{depth_start} m", va='center', fontsize=10, color='black')  # Colocamos a la izquierda y en la parte baja de cada barra
 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
