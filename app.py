@@ -49,10 +49,13 @@ if uploaded_file is not None:
     for i, row in data.iterrows():
         ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
-    # Ajustar la posición de las etiquetas de espesor para evitar solapamientos
+    # Agregar intervalos de profundidad en lugar de espesor
     for i, row in data.iterrows():
-        # Colocar la etiqueta de espesor a la izquierda de la barra, alejándola más
-        ax.text(-0.6, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
+        # Crear el intervalo de profundidad
+        depth_interval = f"{row['Profundidad Inicio (m)']} - {row['Profundidad Fin (m)']}"
+        
+        # Colocar el intervalo a la izquierda de la barra
+        ax.text(-0.6, y_pos[i], depth_interval, va='center', fontsize=10, color='black')
         
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
