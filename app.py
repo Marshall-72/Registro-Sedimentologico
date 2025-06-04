@@ -53,17 +53,39 @@ color_map = {
 
 # Agregar color a cada litología
 df["Color Hex"] = df["Litología"].map(color_map)
-df["Color Hex"] = df["Color Hex"].apply(lambda x: f"background-color: {x}")
 
-# Mostrar la tabla con colores aplicados
+# Crear la columna de Intervalo (Inicio - Fin)
+df["Intervalo (m)"] = df["Profundidad Inicio (m)"].astype(str) + " - " + df["Profundidad Fin (m)"].astype(str)
+
+# Remover la columna "Color Hex" ya que no la necesitamos
+df = df.drop(columns=["Color Hex"])
+
+# Crear la columna de Litología con imágenes
+image_map = {
+    "Travertino": "https://via.placeholder.com/50x50/8B4513/FFFFFF?text=T",  # Imagen de ejemplo
+    "Arenisca con piroclastos": "https://via.placeholder.com/50x50/F4A300/FFFFFF?text=A",
+    "Yeso": "https://via.placeholder.com/50x50/FFFFFF/000000?text=Y",
+    "Arcosa": "https://via.placeholder.com/50x50/FF6347/FFFFFF?text=Ar",
+    "Caliza": "https://via.placeholder.com/50x50/6A5ACD/FFFFFF?text=C",
+    "Sal": "https://via.placeholder.com/50x50/FFF8DC/000000?text=S",
+    "Arenisca de grano grueso": "https://via.placeholder.com/50x50/F0E68C/000000?text=AGG",
+    "Shale calcáreo": "https://via.placeholder.com/50x50/708090/FFFFFF?text=SC",
+    "Marga": "https://via.placeholder.com/50x50/D2B48C/FFFFFF?text=M",
+    "Arenisca con feldespatos": "https://via.placeholder.com/50x50/DAA520/FFFFFF?text=AF",
+    "Lutita": "https://via.placeholder.com/50x50/8B4513/FFFFFF?text=L",
+    "Arenisca cuarzosa": "https://via.placeholder.com/50x50/F0E68C/000000?text=AC",
+}
+
+# Asignar la URL de la imagen correspondiente a cada litología
+df["Litología Imagen"] = df["Litología"].map(image_map)
+
+# Mostrar la tabla con los cambios aplicados
 st.write("### Columna Estratigráfica")
-
-# Mostrar tabla simple sin intentar aplicar estilos complejos
 st.dataframe(df)
 
 # Mostrar descripción de la columna estratigráfica
 st.write("""
     **Descripción de la Columna Estratigráfica**:
     Esta tabla muestra la estratificación de los diferentes estratos, con su correspondiente litología, 
-    intervalos de profundidad y descripción.
+    intervalos de profundidad y descripción. Las imágenes en la columna de Litología representan los materiales.
 """)
