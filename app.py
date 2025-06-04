@@ -94,8 +94,7 @@ if uploaded_file:
                 y1=row["Profundidad Inicio (m)"] + fixed_height,
                 fillcolor=row["Color_hex"],
                 line=dict(color="black", width=1),
-                opacity=0.6,  # Control de opacidad para los patrones
-                layer="below"
+                opacity=0.6  # Control de opacidad para los patrones
             )
             
             # Agregar patrón (usando hatch en Plotly)
