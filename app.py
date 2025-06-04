@@ -40,7 +40,7 @@ if uploaded_file is not None:
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # Longitud fija para todas las barras (independientemente del espesor)
-    fixed_length = 100  # Por ejemplo, 10 metros de longitud fija
+    fixed_length = 5  # Por ejemplo, 10 metros de longitud fija
 
     # Inicializar la posición de la barra (y-axis)
     y_pos = np.arange(len(data))
