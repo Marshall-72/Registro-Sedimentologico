@@ -62,29 +62,35 @@ if uploaded_file:
             needed["descripcion"]: "Descripción"
         })
 
+        # Añadir espesor (m) para los estratos
         df["Espesor (m)"] = df["Profundidad Fin (m)"] - df["Profundidad Inicio (m)"]
 
+        # Normalizar color
         def obtener_color(c):
             c_lower = str(c).strip().lower()
-            # Asegurarnos de que el color sea válido para Plotly
             return color_map.get(c_lower, "#808080")  # Si no se encuentra, asignamos gris
 
         df["Color_hex"] = df["Color"].apply(obtener_color)
 
+        # Crear figura de Plotly
         fig = go.Figure()
 
+        # Para escalar los estratos visualmente, usamos un valor fijo
+        visual_scale_factor = 15  # Factor para visualizar mejor la altura de los estratos
+
+        # Agregar cada estrato al gráfico
         for idx, row in df.iterrows():
             fig.add_shape(
                 type="rect",
                 x0=0, x1=1,
-                y0=row["Profundidad Inicio (m)"],
-                y1=row["Profundidad Fin (m)"],
+                y0=visual_scale_factor * idx,  # Posición en Y ajustada
+                y1=visual_scale_factor * (idx + 1),  # Ajustamos la siguiente posición
                 fillcolor=row["Color_hex"],
                 line=dict(color="black", width=1)
             )
             fig.add_annotation(
                 x=0.5,
-                y=(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2,
+                y=(visual_scale_factor * idx + visual_scale_factor * (idx + 1)) / 2,
                 text=row["Litologia"],
                 showarrow=False,
                 font=dict(color="black", size=10),
@@ -94,7 +100,7 @@ if uploaded_file:
             )
             fig.add_trace(go.Scatter(
                 x=[0.5],
-                y=[(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2],
+                y=[(visual_scale_factor * idx + visual_scale_factor * (idx + 1)) / 2],
                 mode="markers",
                 marker=dict(size=30, color="rgba(0,0,0,0)"),
                 hovertemplate=(
@@ -105,7 +111,12 @@ if uploaded_file:
                 )
             ))
 
-        fig.update_yaxes(autorange="reversed", title="Profundidad (m)", dtick=500)
+        # Ajustes finales del gráfico
+        fig.update_yaxes(
+            range=[0, visual_scale_factor * len(df)],  # Ajustar el rango de Y
+            title="Profundidad (m)",
+            dtick=visual_scale_factor * 2
+        )
         fig.update_xaxes(visible=False)
         fig.update_layout(
             height=900,
