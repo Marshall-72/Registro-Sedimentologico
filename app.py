@@ -57,6 +57,8 @@ df["Color Hex"] = df["Color Hex"].apply(lambda x: f"background-color: {x}")
 
 # Mostrar la tabla con colores aplicados
 st.write("### Columna Estratigráfica")
+
+# Aplicar el estilo y mostrar la tabla
 st.dataframe(df.style.applymap(lambda x: 'background-color : ' + x, subset=["Color Hex"]).hide_columns())
 
 # Mostrar descripción de la columna estratigráfica
