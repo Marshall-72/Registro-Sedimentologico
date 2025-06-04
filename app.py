@@ -49,10 +49,10 @@ if uploaded_file is not None:
     for i, row in data.iterrows():
         ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
-    # Agregar el espesor y la descripción a la izquierda de cada barra
+    # Ajustar la posición de las etiquetas de espesor para evitar solapamientos
     for i, row in data.iterrows():
-        # Colocar la etiqueta de espesor a la izquierda de la barra
-        ax.text(-0.2, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
+        # Colocar la etiqueta de espesor a la izquierda de la barra (más alejada para evitar solapamientos)
+        ax.text(-0.4, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
         
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
