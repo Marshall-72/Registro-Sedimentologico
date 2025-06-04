@@ -53,9 +53,9 @@ if uploaded_file is not None:
     for i, row in data.iterrows():
         # Mover la etiqueta de espesor
         ax.text(fixed_length + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
-        
+
         # Agregar "espacio invisible" para mover la descripción hacia la derecha
-        invisible_space = " " * 5  # 5 espacios invisibles para desplazar la descripción
+        invisible_space = "\u200b" * 10  # 5 espacios invisibles para desplazar la descripción
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, invisible_space + row['Descripcion'], va='center', fontsize=8, color='black')  # Desplazamiento mayor
 
     # Establecer los límites y etiquetas
