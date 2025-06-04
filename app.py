@@ -57,9 +57,8 @@ if uploaded_file is not None:
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
-    # Establecer los límites y etiquetas
-    ax.set_ylabel('Estratos')
-    ax.set_title('Columna Estratigráfica')
+    # Eliminar el nombre del eje Y
+    ax.set_ylabel('')  
 
     # Eliminar los números y el nombre del eje horizontal (eje X)
     ax.set_xticks([])  # Eliminar los ticks del eje X
@@ -67,6 +66,10 @@ if uploaded_file is not None:
 
     # Eliminar las etiquetas de los estratos en el eje Y
     ax.set_yticks([])  # Eliminar las etiquetas del eje Y
+
+    # Eliminar las líneas de borde de la gráfica (spines)
+    for spine in ax.spines.values():
+        spine.set_visible(False)
 
     # Invertir el eje y para que los estratos más profundos estén abajo
     ax.invert_yaxis()
