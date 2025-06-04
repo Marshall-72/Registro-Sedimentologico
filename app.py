@@ -30,8 +30,9 @@ if uploaded_file is not None:
     else:
         data = pd.read_csv(uploaded_file)
 
-    # Mostrar los primeros datos
+    # Mostrar los primeros datos y las columnas
     st.write(data.head())
+    st.write("Columnas disponibles:", data.columns)
 
     # Reemplazar los colores con sus valores hexadecimales
     data['Color'] = data['Color'].apply(lambda x: color_map.get(x, '#808080'))  # Usar gris como valor por defecto
