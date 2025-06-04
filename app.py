@@ -54,8 +54,9 @@ if uploaded_file is not None:
         # Mover la etiqueta de espesor
         ax.text(fixed_length + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
         
-        # Mover la descripción más a la derecha
-        ax.text(fixed_length + 0.15, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')  # Desplazamiento mayor
+        # Agregar "espacio invisible" para mover la descripción hacia la derecha
+        invisible_space = " " * 5  # 5 espacios invisibles para desplazar la descripción
+        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, invisible_space + row['Descripcion'], va='center', fontsize=8, color='black')  # Desplazamiento mayor
 
     # Establecer los límites y etiquetas
     ax.set_ylabel('Estratos')
