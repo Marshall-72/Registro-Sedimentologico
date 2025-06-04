@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Título de la app
-st.title("Columna Estratigráfica")
+st.title("Columna Estratigráfica con Texturas en las Barras")
 
 # Diccionario con los colores mapeados a sus valores hexadecimales
 color_map = {
@@ -18,6 +18,16 @@ color_map = {
     "marrón claro": "#CD853F",
     "marron claro": "#CD853F",
     "gris": "#808080"
+}
+
+# Diccionario con las texturas mapeadas a las litologías
+texture_map = {
+    "travertino": '/',
+    "arenisca con piroclastos": '\\',
+    "caliza": '*',
+    "gravas": '+',
+    "arcilla": '-',
+    "roca volcánica": '|'
 }
 
 # Subir archivo
@@ -47,7 +57,10 @@ if uploaded_file is not None:
 
     # Dibujar las barras con longitud fija y color correspondiente, sin espacio entre barras
     for i, row in data.iterrows():
-        ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
+        # Obtener la textura correspondiente a la litología
+        texture = texture_map.get(row['Litología'].lower(), '')  # Si no hay textura asignada, no se aplica ninguna
+
+        ax.barh(y_pos[i], fixed_length, height=0.9, color=row['Color'], align='center', hatch=texture)  # Aplicar textura
 
     # Ajustar la posición de las etiquetas de los intervalos para evitar solapamientos
     for i, row in data.iterrows():
