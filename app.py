@@ -60,8 +60,8 @@ if uploaded_file is not None:
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.1, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
-    # Agregar el encabezado en la parte superior del gráfico
-    ax.text(0.5, len(data), "Profundidad (m) | Litología | Descripción", ha='center', va='center', fontsize=12, fontweight='bold')
+    # Colocar el encabezado en la parte superior del gráfico utilizando plt.text()
+    plt.text(0.5, 1.02, "Profundidad (m) | Litología | Descripción", ha='center', va='center', fontsize=14, fontweight='bold', transform=ax.transAxes)
 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
