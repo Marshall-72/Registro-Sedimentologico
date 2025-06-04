@@ -40,7 +40,7 @@ if uploaded_file is not None:
     fig, ax = plt.subplots(figsize=(10, 10))
 
     # Longitud fija para todas las barras (ahora reducida a la mitad)
-    fixed_length = 5  # Reducción de la longitud a la mitad (5 metros de longitud fija)
+    fixed_length = 6  # Aumento ligeramente el largo de las barras para más espacio
 
     # Inicializar la posición de la barra (y-axis)
     y_pos = np.arange(len(data))
@@ -49,16 +49,16 @@ if uploaded_file is not None:
     for i, row in data.iterrows():
         ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
-    # Agregar intervalos de profundidad en lugar de espesor
+    # Ajustar la posición de las etiquetas de espesor para evitar solapamientos
     for i, row in data.iterrows():
         # Crear el intervalo de profundidad
         depth_interval = f"{row['Profundidad Inicio (m)']} - {row['Profundidad Fin (m)']}"
         
-        # Colocar el intervalo a la izquierda de la barra
-        ax.text(-0.6, y_pos[i], depth_interval, va='center', fontsize=10, color='black')
+        # Colocar el intervalo a la izquierda de la barra, ajustando para evitar solapamientos
+        ax.text(-0.8, y_pos[i], depth_interval, va='center', fontsize=10, color='black')  # Desplazo más a la izquierda para evitar solapamiento
         
         # Agregar la descripción a la derecha de la barra
-        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
+        ax.text(fixed_length + 0.15, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
