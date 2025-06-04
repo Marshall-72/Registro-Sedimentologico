@@ -14,6 +14,8 @@ color_map = {
     "negro": "#000000",
     "marrón claro": "#CD853F",
     "marron claro": "#CD853F",
+    "gris": "#808080",  # Asignar un gris válido
+    # Puedes añadir más colores si es necesario
 }
 
 st.title("Columna Estratigráfica Interactiva")
@@ -64,7 +66,8 @@ if uploaded_file:
 
         def obtener_color(c):
             c_lower = str(c).strip().lower()
-            return color_map.get(c_lower, c_lower)
+            # Asegurarnos de que el color sea válido para Plotly
+            return color_map.get(c_lower, "#808080")  # Si no se encuentra, asignamos gris
 
         df["Color_hex"] = df["Color"].apply(obtener_color)
 
