@@ -47,7 +47,7 @@ if uploaded_file is not None:
 
     # Dibujar las barras con longitud fija y color correspondiente, sin espacio entre barras
     for i, row in data.iterrows():
-        ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
+        ax.barh(y_pos[i], fixed_length, height=0.9, color=row['Color'], align='center')  # height=0.9 para eliminar espacio
 
     # Ajustar la posición de las etiquetas de los intervalos para evitar solapamientos
     for i, row in data.iterrows():
@@ -59,6 +59,9 @@ if uploaded_file is not None:
         
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.1, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
+
+    # Agregar el encabezado en la parte superior del gráfico
+    ax.text(0.5, len(data), "Profundidad (m) | Litología | Descripción", ha='center', va='center', fontsize=12, fontweight='bold')
 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
