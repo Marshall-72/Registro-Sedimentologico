@@ -80,6 +80,9 @@ if uploaded_file:
 
         fig = go.Figure()
 
+        # Establecer un tamaño fijo para los estratos
+        fixed_height = 20  # Ajustar el tamaño fijo que quieras para todos los estratos
+
         # Agregar cada estrato al gráfico con un patrón
         for idx, row in df.iterrows():
             pattern = pattern_map.get(row["Litologia"], "/")  # Si no encuentra patrón, usa "/"
@@ -88,7 +91,7 @@ if uploaded_file:
                 type="rect",
                 x0=0, x1=1,
                 y0=row["Profundidad Inicio (m)"],
-                y1=row["Profundidad Fin (m)"],
+                y1=row["Profundidad Inicio (m)"] + fixed_height,
                 fillcolor=row["Color_hex"],
                 line=dict(color="black", width=1),
                 opacity=0.6,  # Control de opacidad para los patrones
@@ -100,7 +103,7 @@ if uploaded_file:
                 type="rect",
                 x0=0, x1=1,
                 y0=row["Profundidad Inicio (m)"],
-                y1=row["Profundidad Fin (m)"],
+                y1=row["Profundidad Inicio (m)"] + fixed_height,
                 line=dict(color="black", width=1),
                 fillcolor="rgba(255,255,255,0)",  # Transparente para que el patrón se vea
                 opacity=0.5,
@@ -111,7 +114,7 @@ if uploaded_file:
             # Añadir anotación con Litología
             fig.add_annotation(
                 x=0.5,
-                y=(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2,
+                y=(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2,
                 text=row["Litologia"],
                 showarrow=False,
                 font=dict(color="black", size=10),
@@ -123,7 +126,7 @@ if uploaded_file:
             # Agregar trace con el texto informativo
             fig.add_trace(go.Scatter(
                 x=[0.5],
-                y=[(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2],
+                y=[(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2],
                 mode="markers",
                 marker=dict(size=30, color="rgba(0,0,0,0)"),
                 hovertemplate=(
@@ -134,8 +137,13 @@ if uploaded_file:
                 )
             ))
 
-        # Ajustar el rango y los ejes del gráfico
-        fig.update_yaxes(autorange="reversed", title="Profundidad (m)", dtick=500)
+        fig.update_yaxes(
+            title="Profundidad (m)",
+            tickmode="array",
+            tickvals=df["Profundidad Inicio (m)"],  # Establecer la escala de profundidades
+            ticktext=df["Profundidad Inicio (m)"].astype(str),
+            range=[0, df["Profundidad Inicio (m)"].max() + fixed_height * len(df)]
+        )
         fig.update_xaxes(visible=False)
         fig.update_layout(
             height=900,
@@ -155,4 +163,3 @@ if uploaded_file:
         st.error(f"Error al leer el archivo Excel: {e}")
 else:
     st.info("Por favor, carga un archivo Excel (.xlsx) para visualizar la columna estratigráfica.")
-
