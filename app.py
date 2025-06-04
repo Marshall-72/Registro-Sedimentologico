@@ -17,14 +17,15 @@ color_map = {
     "gris": "#808080",  # Gris por defecto
 }
 
-# Diccionario para patrones de cada litología
-pattern_map = {
-    "Arenisca": "/",
-    "Lutita": "x",
-    "Caliza": "|",
-    "Shale calcáreo": "-",
-    "Arcosa": "+",
-    "Sal": "*",
+# Diccionario para imágenes de texturas por litología
+# Aquí se pueden incluir imágenes de texturas relacionadas con cada litología
+texture_map = {
+    "Arenisca": "https://example.com/sand_texture.png",  # URL de ejemplo
+    "Lutita": "https://example.com/clay_texture.png",
+    "Caliza": "https://example.com/limestone_texture.png",
+    "Shale calcáreo": "https://example.com/shale_texture.png",
+    "Arcosa": "https://example.com/arcosa_texture.png",
+    "Sal": "https://example.com/salt_texture.png",
 }
 
 st.title("Columna Estratigráfica Interactiva")
@@ -83,10 +84,10 @@ if uploaded_file:
         # Establecer un tamaño fijo para los estratos
         fixed_height = 20  # Ajustar el tamaño fijo que quieras para todos los estratos
 
-        # Agregar cada estrato al gráfico con un patrón
+        # Agregar cada estrato al gráfico con un patrón (ahora usando imágenes de texturas)
         for idx, row in df.iterrows():
-            pattern = pattern_map.get(row["Litologia"], "/")  # Si no encuentra patrón, usa "/"
-            
+            texture_url = texture_map.get(row["Litologia"], "https://example.com/default_texture.png")  # URL por defecto
+
             fig.add_shape(
                 type="rect",
                 x0=0, x1=1,
@@ -96,18 +97,15 @@ if uploaded_file:
                 line=dict(color="black", width=1),
                 opacity=0.6  # Control de opacidad para los patrones
             )
-            
-            # Agregar patrón (usando hatch en Plotly)
-            fig.add_shape(
-                type="rect",
-                x0=0, x1=1,
-                y0=row["Profundidad Inicio (m)"],
-                y1=row["Profundidad Inicio (m)"] + fixed_height,
-                line=dict(color="black", width=1),
-                fillcolor="rgba(255,255,255,0)",  # Transparente para que el patrón se vea
-                opacity=0.5,
-                pattern_shape=pattern,
-                pattern_density=0.1  # Cambiar la densidad del patrón
+
+            # Agregar la imagen como textura (usando un patrón de imagen)
+            fig.add_layout_image(
+                source=texture_url,
+                xref="paper", yref="y",
+                x=0, y=row["Profundidad Inicio (m)"] + fixed_height / 2,
+                sizex=1, sizey=fixed_height,
+                opacity=0.3,
+                layer="above"
             )
 
             # Añadir anotación con Litología
