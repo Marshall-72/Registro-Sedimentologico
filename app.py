@@ -49,14 +49,13 @@ if uploaded_file is not None:
     for i, row in data.iterrows():
         ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
-    # Agregar el espesor y la descripción a la derecha de cada barra
+    # Agregar el espesor y la descripción a la izquierda de cada barra
     for i, row in data.iterrows():
-        # Mover la etiqueta de espesor
-        ax.text(fixed_length + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
-
-        # Agregar "espacio invisible" para mover la descripción hacia la derecha
-        invisible_space = "\u200b" * 10  # 5 espacios invisibles para desplazar la descripción
-        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, invisible_space + row['Descripcion'], va='center', fontsize=8, color='black')  # Desplazamiento mayor
+        # Colocar la etiqueta de espesor a la izquierda de la barra
+        ax.text(-0.2, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
+        
+        # Agregar la descripción a la derecha de la barra
+        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
     # Establecer los límites y etiquetas
     ax.set_ylabel('Estratos')
