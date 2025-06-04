@@ -39,17 +39,20 @@ if uploaded_file is not None:
     # Crear la figura y los ejes
     fig, ax = plt.subplots(figsize=(10, 10))
 
+    # Longitud fija para todas las barras (independientemente del espesor)
+    fixed_length = 10  # Por ejemplo, 10 metros de longitud fija
+
     # Inicializar la posición de la barra (y-axis)
     y_pos = np.arange(len(data))
 
-    # Dibujar las barras de colores correspondientes a cada estrato en la parte izquierda
+    # Dibujar las barras con longitud fija y color correspondiente
     for i, row in data.iterrows():
-        ax.barh(y_pos[i], row['Espesor (m)'], height=0.9, color=row['Color'], align='center')
+        ax.barh(y_pos[i], fixed_length, height=0.9, color=row['Color'], align='center')
 
     # Agregar el espesor y la descripción a la derecha de cada barra
     for i, row in data.iterrows():
-        ax.text(row['Espesor (m)'] + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
-        ax.text(row['Espesor (m)'] + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
+        ax.text(fixed_length + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
+        ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
     # Establecer los límites y etiquetas
     ax.set_xlabel('Espesor (m)')
@@ -64,3 +67,4 @@ if uploaded_file is not None:
     # Ajustar el layout y mostrar la gráfica
     plt.tight_layout()
     st.pyplot(fig)
+
