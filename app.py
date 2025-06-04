@@ -55,11 +55,14 @@ if uploaded_file is not None:
         ax.text(fixed_length + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
     # Establecer los límites y etiquetas
-    ax.set_xlabel('Espesor (m)')
     ax.set_ylabel('Estratos')
     ax.set_yticks(y_pos)
     ax.set_yticklabels(data['Litologia'])
     ax.set_title('Columna Estratigráfica')
+
+    # Eliminar los números y el nombre del eje horizontal (eje X)
+    ax.set_xticks([])  # Eliminar los ticks del eje X
+    ax.set_xlabel('')  # Eliminar el nombre del eje X
 
     # Invertir el eje y para que los estratos más profundos estén abajo
     ax.invert_yaxis()
