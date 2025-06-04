@@ -1,91 +1,49 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 
-# Datos de ejemplo con Litología, Profundidad, Color y Descripción
-data = {
-    "Profundidad Inicio (m)": [0, 4, 554, 555, 1305, 1820, 1821, 2566, 3086, 3087, 3947, 4497, 4498, 5236],
-    "Profundidad Fin (m)": [4, 554, 555, 1305, 1820, 1821, 2566, 3086, 3087, 3947, 4497, 4498, 5236, 5810],
-    "Litología": [
-        "Travertino", "Arenisca con piroclastos", "Yeso", "Arcosa", "Caliza", "Sal",
-        "Arenisca de grano grueso", "Shale calcáreo", "Marga", "Arenisca con feldespatos",
-        "Caliza", "Lutita", "Arenisca cuarzosa", "Caliza"
-    ],
-    "Color": [
-        "beige", "marrón", "blanco", "marrón", "gris azul", "blanco",
-        "beige", "negro", "marrón claro", "marrón", "gris oscuro", "gris", "beige", "gris oscuro"
-    ],
-    "Descripción": [
-        "travertino beige de grano muy fino, con estratificación paralela",
-        "arenisca con piroclastos marrón de grano fino subanguloso, con estratificación paralela",
-        "yeso blanco de grano fino, con estratificación simple",
-        "arcosa marrón de grano fino subredondeado, con estratificación cruzada",
-        "caliza gris azulada mudstone, con estratificación simple y, con vetilleo",
-        "sal blanca fibrosa de grano medio, con estratificación simple",
-        "arenisca beige de grano grueso subanguloso, con estratificación cruzada",
-        "shale calcáreo negro de grano subanguloso, con laminación fisible",
-        "marga marrón de grano muy fino, con estratificación simple",
-        "arenisca con feldespatos marrón de grano fino subanguloso, con estratificación paralela",
-        "caliza gris oscura wackestone con biocalstos, con estratificación cóncava",
-        "lutita gris de grano fino subanguloso, con estratificación paralela, y con una vetilla",
-        "arenisca cuarzosa beige de grano fino subredondeado, con estratificación paralela",
-        "caliza gris oscura mudstone, con estratificación cóncava"
-    ]
-}
+# Título de la app
+st.title("Columna Estratigráfica")
 
-# Convertir los datos a un DataFrame
-df = pd.DataFrame(data)
+# Subir archivo
+uploaded_file = st.file_uploader("Sube tu archivo de datos", type=["xlsx", "csv"])
 
-# Definir una paleta de colores para las litologías
-color_map = {
-    "Travertino": "beige",
-    "Arenisca con piroclastos": "marrón",
-    "Yeso": "blanco",
-    "Arcosa": "marrón",
-    "Caliza": "gris azul",
-    "Sal": "blanco",
-    "Arenisca de grano grueso": "beige",
-    "Shale calcáreo": "negro",
-    "Marga": "marrón claro",
-    "Arenisca con feldespatos": "marrón",
-    "Lutita": "gris oscuro",
-    "Arenisca cuarzosa": "beige",
-}
+if uploaded_file is not None:
+    # Leer el archivo
+    if uploaded_file.name.endswith("xlsx"):
+        data = pd.read_excel(uploaded_file)
+    else:
+        data = pd.read_csv(uploaded_file)
 
-# Agregar color a cada litología
-df["Color Hex"] = df["Litología"].map(color_map)
+    # Mostrar los primeros datos
+    st.write(data.head())
 
-# Crear la columna de Intervalo (Inicio - Fin)
-df["Intervalo (m)"] = df["Profundidad Inicio (m)"].astype(str) + " - " + df["Profundidad Fin (m)"].astype(str)
+    # Crear la figura y los ejes
+    fig, ax = plt.subplots(figsize=(10, 10))
 
-# Remover la columna "Color Hex" ya que no la necesitamos
-df = df.drop(columns=["Color Hex"])
+    # Inicializar la posición de la barra (y-axis)
+    y_pos = np.arange(len(data))
 
-# Crear la columna de Litología con imágenes
-image_map = {
-    "Travertino": "https://static3.depositphotos.com/1002290/150/i/950/depositphotos_1504990-stock-photo-bricks-texture.jpg",  # Imagen de ejemplo
-    "Arenisca con piroclastos": "https://th.bing.com/th/id/R.ab38a924328086926c6ff723b7945f48?rik=NMgt9%2fHZLLswsg&pid=ImgRaw&r=0",
-    "Yeso": "https://via.placeholder.com/50x50/FFFFFF/000000?text=Y",
-    "Arcosa": "https://via.placeholder.com/50x50/FF6347/FFFFFF?text=Ar",
-    "Caliza": "https://via.placeholder.com/50x50/6A5ACD/FFFFFF?text=C",
-    "Sal": "https://via.placeholder.com/50x50/FFF8DC/000000?text=S",
-    "Arenisca de grano grueso": "https://via.placeholder.com/50x50/F0E68C/000000?text=AGG",
-    "Shale calcáreo": "https://via.placeholder.com/50x50/708090/FFFFFF?text=SC",
-    "Marga": "https://via.placeholder.com/50x50/D2B48C/FFFFFF?text=M",
-    "Arenisca con feldespatos": "https://via.placeholder.com/50x50/DAA520/FFFFFF?text=AF",
-    "Lutita": "https://via.placeholder.com/50x50/8B4513/FFFFFF?text=L",
-    "Arenisca cuarzosa": "https://via.placeholder.com/50x50/F0E68C/000000?text=AC",
-}
+    # Dibujar las barras de colores correspondientes a cada estrato en la parte izquierda
+    for i, row in data.iterrows():
+        ax.barh(y_pos[i], row['Espesor (m)'], height=0.9, color=row['Color'], align='center')
 
-# Asignar la URL de la imagen correspondiente a cada litología
-df["Litología Imagen"] = df["Litología"].map(image_map)
+    # Agregar el espesor y la descripción a la derecha de cada barra
+    for i, row in data.iterrows():
+        ax.text(row['Espesor (m)'] + 0.05, y_pos[i], f"{row['Espesor (m)']} m", va='center', fontsize=10, color='black')
+        ax.text(row['Espesor (m)'] + 0.05, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
-# Mostrar la tabla con los cambios aplicados
-st.write("### Columna Estratigráfica")
-st.dataframe(df)
+    # Establecer los límites y etiquetas
+    ax.set_xlabel('Espesor (m)')
+    ax.set_ylabel('Estratos')
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(data['Litologia'])
+    ax.set_title('Columna Estratigráfica')
 
-# Mostrar descripción de la columna estratigráfica
-st.write("""
-    **Descripción de la Columna Estratigráfica**:
-    Esta tabla muestra la estratificación de los diferentes estratos, con su correspondiente litología, 
-    intervalos de profundidad y descripción. Las imágenes en la columna de Litología representan los materiales.
-""")
+    # Invertir el eje y para que los estratos más profundos estén abajo
+    ax.invert_yaxis()
+
+    # Ajustar el layout y mostrar la gráfica
+    plt.tight_layout()
+    st.pyplot(fig)
