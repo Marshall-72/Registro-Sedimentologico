@@ -39,15 +39,15 @@ if uploaded_file is not None:
     # Crear la figura y los ejes
     fig, ax = plt.subplots(figsize=(10, 10))
 
-    # Longitud fija para todas las barras (independientemente del espesor)
-    fixed_length = 5  # Por ejemplo, 10 metros de longitud fija
+    # Longitud fija para todas las barras (ahora reducida a la mitad)
+    fixed_length = 5  # Reducción de la longitud a la mitad (5 metros de longitud fija)
 
     # Inicializar la posición de la barra (y-axis)
     y_pos = np.arange(len(data))
 
-    # Dibujar las barras con longitud fija y color correspondiente
+    # Dibujar las barras con longitud fija y color correspondiente, sin espacio entre barras
     for i, row in data.iterrows():
-        ax.barh(y_pos[i], fixed_length, height=0.9, color=row['Color'], align='center')
+        ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
     # Agregar el espesor y la descripción a la derecha de cada barra
     for i, row in data.iterrows():
@@ -71,4 +71,3 @@ if uploaded_file is not None:
     # Ajustar el layout y mostrar la gráfica
     plt.tight_layout()
     st.pyplot(fig)
-
