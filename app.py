@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import unidecode  # para eliminar tildes
 
-# Diccionario para colores
+# Diccionario de colores para litología
 color_map = {
     "beige": "#F5F5DC",
     "marrón": "#A0522D",
@@ -14,8 +14,17 @@ color_map = {
     "negro": "#000000",
     "marrón claro": "#CD853F",
     "marron claro": "#CD853F",
-    "gris": "#808080",  # Asignar un gris válido
-    # Puedes añadir más colores si es necesario
+    "gris": "#808080",  # Gris por defecto
+}
+
+# Diccionario para patrones de cada litología
+pattern_map = {
+    "Arenisca": "/",
+    "Lutita": "x",
+    "Caliza": "|",
+    "Shale calcáreo": "-",
+    "Arcosa": "+",
+    "Sal": "*",
 }
 
 st.title("Columna Estratigráfica Interactiva")
@@ -23,20 +32,19 @@ st.title("Columna Estratigráfica Interactiva")
 uploaded_file = st.file_uploader("Carga un archivo Excel (.xlsx) con los datos estratigráficos", type=["xlsx"])
 
 def normalize_col(col_name):
-    # Pasar a minúsculas, quitar tildes y espacios
     return unidecode.unidecode(col_name.strip().lower().replace(" ", "").replace("_",""))
 
 if uploaded_file:
     try:
         df = pd.read_excel(uploaded_file)
 
-        # Mostrar columnas detectadas para ayudar al usuario
+        # Mostrar las columnas del archivo
         st.write("Columnas detectadas en el archivo:", df.columns.tolist())
 
         # Normalizamos columnas para hacer matching flexible
         norm_cols = {normalize_col(c): c for c in df.columns}
 
-        # Definir qué columnas buscamos y sus nombres normalizados
+        # Definir las columnas necesarias
         needed = {
             "profundidadinicio(m)": None,
             "profundidadfin(m)": None,
@@ -53,7 +61,7 @@ if uploaded_file:
                 st.error(f"No se encontró columna requerida similar a '{key}'")
                 st.stop()
 
-        # Renombrar df con nombres estándar para facilitar uso
+        # Renombrar columnas para su uso
         df = df.rename(columns={
             needed["profundidadinicio(m)"]: "Profundidad Inicio (m)",
             needed["profundidadfin(m)"]: "Profundidad Fin (m)",
@@ -62,35 +70,48 @@ if uploaded_file:
             needed["descripcion"]: "Descripción"
         })
 
-        # Añadir espesor (m) para los estratos
         df["Espesor (m)"] = df["Profundidad Fin (m)"] - df["Profundidad Inicio (m)"]
 
-        # Normalizar color
         def obtener_color(c):
             c_lower = str(c).strip().lower()
-            return color_map.get(c_lower, "#808080")  # Si no se encuentra, asignamos gris
+            return color_map.get(c_lower, "#808080")
 
         df["Color_hex"] = df["Color"].apply(obtener_color)
 
-        # Crear figura de Plotly
         fig = go.Figure()
 
-        # Tamaño fijo para cada estrato
-        fixed_height = 20  # Ajustar el tamaño fijo que quieras para todos los estratos
-
-        # Agregar cada estrato al gráfico
+        # Agregar cada estrato al gráfico con un patrón
         for idx, row in df.iterrows():
+            pattern = pattern_map.get(row["Litologia"], "/")  # Si no encuentra patrón, usa "/"
+            
             fig.add_shape(
                 type="rect",
                 x0=0, x1=1,
-                y0=row["Profundidad Inicio (m)"],  # Mantener la profundidad inicial
-                y1=row["Profundidad Inicio (m)"] + fixed_height,  # Usar el tamaño fijo
+                y0=row["Profundidad Inicio (m)"],
+                y1=row["Profundidad Fin (m)"],
                 fillcolor=row["Color_hex"],
-                line=dict(color="black", width=1)
+                line=dict(color="black", width=1),
+                opacity=0.6,  # Control de opacidad para los patrones
+                layer="below"
             )
+            
+            # Agregar patrón (usando hatch en Plotly)
+            fig.add_shape(
+                type="rect",
+                x0=0, x1=1,
+                y0=row["Profundidad Inicio (m)"],
+                y1=row["Profundidad Fin (m)"],
+                line=dict(color="black", width=1),
+                fillcolor="rgba(255,255,255,0)",  # Transparente para que el patrón se vea
+                opacity=0.5,
+                pattern_shape=pattern,
+                pattern_density=0.1  # Cambiar la densidad del patrón
+            )
+
+            # Añadir anotación con Litología
             fig.add_annotation(
                 x=0.5,
-                y=(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2,
+                y=(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2,
                 text=row["Litologia"],
                 showarrow=False,
                 font=dict(color="black", size=10),
@@ -98,9 +119,11 @@ if uploaded_file:
                 xanchor="center",
                 textangle=90
             )
+
+            # Agregar trace con el texto informativo
             fig.add_trace(go.Scatter(
                 x=[0.5],
-                y=[(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2],
+                y=[(row["Profundidad Inicio (m)"] + row["Profundidad Fin (m)"]) / 2],
                 mode="markers",
                 marker=dict(size=30, color="rgba(0,0,0,0)"),
                 hovertemplate=(
@@ -111,13 +134,8 @@ if uploaded_file:
                 )
             ))
 
-        fig.update_yaxes(
-            title="Profundidad (m)",
-            tickmode="array",
-            tickvals=df["Profundidad Inicio (m)"],  # Establecer la escala de profundidades
-            ticktext=df["Profundidad Inicio (m)"].astype(str),
-            range=[0, df["Profundidad Inicio (m)"].max() + fixed_height * len(df)]
-        )
+        # Ajustar el rango y los ejes del gráfico
+        fig.update_yaxes(autorange="reversed", title="Profundidad (m)", dtick=500)
         fig.update_xaxes(visible=False)
         fig.update_layout(
             height=900,
@@ -129,7 +147,12 @@ if uploaded_file:
 
         st.plotly_chart(fig, use_container_width=True)
 
+        # Mostrar una tabla de las litologías y sus patrones
+        st.write("Tabla de Litologías y Patrones")
+        st.dataframe(df[["Litologia", "Color", "Descripción"]])
+
     except Exception as e:
         st.error(f"Error al leer el archivo Excel: {e}")
 else:
     st.info("Por favor, carga un archivo Excel (.xlsx) para visualizar la columna estratigráfica.")
+
