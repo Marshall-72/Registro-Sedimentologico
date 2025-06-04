@@ -40,14 +40,14 @@ if uploaded_file is not None:
     fig, ax = plt.subplots(figsize=(12, 10))
 
     # Longitud fija para todas las barras (ahora reducida un poco más)
-    fixed_length = 4  # Reducción del largo de las barras para dar más espacio
+    fixed_length = 4  # Aumento ligeramente el largo de las barras para más espacio
 
     # Inicializar la posición de la barra (y-axis)
     y_pos = np.arange(len(data))
 
     # Dibujar las barras con longitud fija y color correspondiente, sin espacio entre barras
     for i, row in data.iterrows():
-        ax.barh(y_pos[i], fixed_length, height=0.9, color=row['Color'], align='center')  # height=0.9 para eliminar espacio
+        ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
 
     # Ajustar la posición de las etiquetas de los intervalos para evitar solapamientos
     for i, row in data.iterrows():
@@ -55,7 +55,7 @@ if uploaded_file is not None:
         depth_interval = f"{row['Profundidad Inicio (m)']} - {row['Profundidad Fin (m)']}"
         
         # Colocar el intervalo a la izquierda de la barra, más alejado
-        ax.text(-1.2, y_pos[i], depth_interval, va='center', fontsize=10, color='black')  # Desplazo aún más a la izquierda
+        ax.text(-1.2, y_pos[i], depth_interval, va='center', fontsize=10, color='black')  # Desplazo más a la izquierda para evitar solapamiento
         
         # Agregar la descripción a la derecha de la barra
         ax.text(fixed_length + 0.1, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
