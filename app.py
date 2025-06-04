@@ -75,22 +75,22 @@ if uploaded_file:
         # Crear figura de Plotly
         fig = go.Figure()
 
-        # Para escalar los estratos visualmente, usamos un valor fijo
-        visual_scale_factor = 15  # Factor para visualizar mejor la altura de los estratos
+        # Tamaño fijo para cada estrato
+        fixed_height = 20  # Ajustar el tamaño fijo que quieras para todos los estratos
 
         # Agregar cada estrato al gráfico
         for idx, row in df.iterrows():
             fig.add_shape(
                 type="rect",
                 x0=0, x1=1,
-                y0=visual_scale_factor * idx,  # Posición en Y ajustada
-                y1=visual_scale_factor * (idx + 1),  # Ajustamos la siguiente posición
+                y0=row["Profundidad Inicio (m)"],  # Mantener la profundidad inicial
+                y1=row["Profundidad Inicio (m)"] + fixed_height,  # Usar el tamaño fijo
                 fillcolor=row["Color_hex"],
                 line=dict(color="black", width=1)
             )
             fig.add_annotation(
                 x=0.5,
-                y=(visual_scale_factor * idx + visual_scale_factor * (idx + 1)) / 2,
+                y=(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2,
                 text=row["Litologia"],
                 showarrow=False,
                 font=dict(color="black", size=10),
@@ -100,7 +100,7 @@ if uploaded_file:
             )
             fig.add_trace(go.Scatter(
                 x=[0.5],
-                y=[(visual_scale_factor * idx + visual_scale_factor * (idx + 1)) / 2],
+                y=[(row["Profundidad Inicio (m)"] + (row["Profundidad Inicio (m)"] + fixed_height)) / 2],
                 mode="markers",
                 marker=dict(size=30, color="rgba(0,0,0,0)"),
                 hovertemplate=(
@@ -111,11 +111,12 @@ if uploaded_file:
                 )
             ))
 
-        # Ajustes finales del gráfico
         fig.update_yaxes(
-            range=[0, visual_scale_factor * len(df)],  # Ajustar el rango de Y
             title="Profundidad (m)",
-            dtick=visual_scale_factor * 2
+            tickmode="array",
+            tickvals=df["Profundidad Inicio (m)"],  # Establecer la escala de profundidades
+            ticktext=df["Profundidad Inicio (m)"].astype(str),
+            range=[0, df["Profundidad Inicio (m)"].max() + fixed_height * len(df)]
         )
         fig.update_xaxes(visible=False)
         fig.update_layout(
