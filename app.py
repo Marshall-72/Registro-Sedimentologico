@@ -6,6 +6,20 @@ import numpy as np
 # Título de la app
 st.title("Columna Estratigráfica")
 
+# Diccionario con los colores mapeados a sus valores hexadecimales
+color_map = {
+    "beige": "#F5F5DC",
+    "marrón": "#A0522D",
+    "marron": "#A0522D",
+    "blanco": "#FFFFFF",
+    "gris azul": "#6B7B8C",
+    "gris oscuro": "#4B4B4B",
+    "negro": "#000000",
+    "marrón claro": "#CD853F",
+    "marron claro": "#CD853F",
+    "gris": "#808080"
+}
+
 # Subir archivo
 uploaded_file = st.file_uploader("Sube tu archivo de datos", type=["xlsx", "csv"])
 
@@ -18,6 +32,9 @@ if uploaded_file is not None:
 
     # Mostrar los primeros datos
     st.write(data.head())
+
+    # Reemplazar los colores con sus valores hexadecimales
+    data['Color'] = data['Color'].apply(lambda x: color_map.get(x, '#808080'))  # Usar gris como valor por defecto
 
     # Crear la figura y los ejes
     fig, ax = plt.subplots(figsize=(10, 10))
