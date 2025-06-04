@@ -61,8 +61,8 @@ if uploaded_file is not None:
         ax.text(fixed_length + 0.1, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
 
     # Colocar el encabezado en la parte superior del gráfico utilizando plt.text()
-    plt.text(0.5, 1.02, "Profundidad (m)          Litología               Descripción", ha='center', va='center', fontsize=14, fontweight='bold', transform=ax.transAxes)
-
+    plt.text(0.5, 1.02, "Profundidad (m)              Litología                     Descripción                    ", ha='center', va='center', fontsize=14, fontweight='bold', transform=ax.transAxes)
+ 
     # Eliminar el nombre del eje Y
     ax.set_ylabel('')  
 
