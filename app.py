@@ -62,7 +62,7 @@ df = df.drop(columns=["Color Hex"])
 
 # Crear la columna de Litología con imágenes
 image_map = {
-    "Travertino": "https://via.placeholder.com/50x50/8B4513/FFFFFF?text=T",  # Imagen de ejemplo
+    "Travertino": "https://static3.depositphotos.com/1002290/150/i/950/depositphotos_1504990-stock-photo-bricks-texture.jpg",  # Imagen de ejemplo
     "Arenisca con piroclastos": "https://via.placeholder.com/50x50/F4A300/FFFFFF?text=A",
     "Yeso": "https://via.placeholder.com/50x50/FFFFFF/000000?text=Y",
     "Arcosa": "https://via.placeholder.com/50x50/FF6347/FFFFFF?text=Ar",
