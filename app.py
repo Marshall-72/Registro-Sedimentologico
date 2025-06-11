@@ -2,23 +2,24 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Cargar tu archivo procesado
+st.set_page_config(layout="wide")
+st.title("Tamaño de Grano vs. Permeabilidad")
+
+# Cargar Excel local
 df = pd.read_excel("CE_procesado.xlsx")
 
-# Determinar función dominante (>50%)
+# Calcular función principal si no existe
 def funcion_principal(row):
-    funciones = {
-        'Reservorio': row['% Reservorio'],
-        'Sello': row['% Sello'],
-        'Roca Madre': row['% Roca Madre']
-    }
-    max_func = max(funciones, key=funciones.get)
-    return max_func if funciones[max_func] > 50 else 'No significativa'
+    funcs = {'Reservorio': row['% Reservorio'], 'Sello': row['% Sello'], 'Roca Madre': row['% Roca Madre']}
+    top = max(funcs, key=funcs.get)
+    return top if funcs[top] > 50 else 'No significativa'
 
-df['Función principal'] = df.apply(funcion_principal, axis=1)
+if 'Función principal' not in df.columns:
+    df['Función principal'] = df.apply(funcion_principal, axis=1)
+
 df_sig = df[df['Función principal'] != 'No significativa']
 
-# Crear gráfico interactivo
+# Gráfico interactivo
 fig = px.scatter(
     df_sig,
     x='Tamaño de grano (1-100)',
@@ -26,13 +27,12 @@ fig = px.scatter(
     color='Función principal',
     size='ESPESOR',
     hover_name='Litología única',
-    title="Relación entre Tamaño de Grano y Permeabilidad",
+    title="Tamaño de Grano vs. Permeabilidad",
     labels={
-        'Tamaño de grano (1-100)': 'Tamaño de grano (1–100)',
-        'Permeabilidad (1-100)': 'Permeabilidad (1–100)',
-        'Función principal': 'Función dominante',
+        'Tamaño de grano (1-100)': 'Tamaño de grano',
+        'Permeabilidad (1-100)': 'Permeabilidad',
         'ESPESOR': 'Espesor (m)'
     }
 )
-fig.update_layout(height=600, width=900)
-fig.show()
+
+st.plotly_chart(fig, use_container_width=True)
