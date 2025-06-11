@@ -58,10 +58,18 @@ fig = px.scatter(
 )
 st.plotly_chart(fig, use_container_width=True)
 
-# 📊 Gráfico de barras agrupadas
-st.markdown("## Porcentaje de Función Petrológica por Litología")
+# 📊 Gráfico de barras agrupadas con filtro >50%
+st.markdown("## Porcentaje de Función Petrológica por Litología (Solo funciones significativas > 50%)")
 
-df_bar = df_sig[['Litología única', '% Reservorio', '% Sello', '% Roca Madre']]
+# Filtrar litologías con al menos una función > 50%
+df_bar = df.copy()
+df_bar = df_bar[
+    (df_bar['% Reservorio'] > 50) |
+    (df_bar['% Sello'] > 50) |
+    (df_bar['% Roca Madre'] > 50)
+]
+
+df_bar = df_bar[['Litología única', '% Reservorio', '% Sello', '% Roca Madre']]
 df_bar = df_bar.melt(
     id_vars='Litología única',
     value_vars=['% Reservorio', '% Sello', '% Roca Madre'],
@@ -75,7 +83,7 @@ fig_bar = px.bar(
     y='Porcentaje',
     color='Función',
     barmode='group',
-    title="Comparación de Funciones Petrológicas por Litología",
+    title="Comparación de Funciones Petrológicas por Litología (>50%)",
     labels={'Litología única': 'Litología'}
 )
 
