@@ -1,86 +1,61 @@
 import streamlit as st
-import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.patches as patches
 import numpy as np
 
-# Título de la app
-st.title("Columna Estratigráfica")
+st.set_page_config(layout="wide")
+st.title("Sistema de Petróleo Chonta-Vivian")
 
-# Diccionario con los colores mapeados a sus valores hexadecimales
-color_map = {
-    "beige": "#F5F5DC",
-    "marrón": "#A0522D",
-    "marron": "#A0522D",
-    "blanco": "#FFFFFF",
-    "gris azul": "#6B7B8C",
-    "gris oscuro": "#4B4B4B",
-    "negro": "#000000",
-    "marrón claro": "#CD853F",
-    "marron claro": "#CD853F",
-    "gris": "#808080"
-}
+fig, ax = plt.subplots(figsize=(16, 8))
+ax.set_xlim(0, 20)
+ax.set_ylim(0, 9)
+ax.axis('off')
 
-# Subir archivo
-uploaded_file = st.file_uploader("Sube tu archivo de datos", type=["xlsx", "csv"])
+# Tiempos geológicos y colores
+tiempos = ["TRIASICO", "JURASICO", "CRETACEO", "TERCIARIO"]
+subtiempos = [["INF", "MED"], ["INF", "MED", "SUP"], ["INF", "SUP"], ["Paleog", "Neógeno"]]
+x_pos = [0, 2, 5, 10]
+anchos = [2, 3, 5, 10]
+colors_tiempo = ['orchid', 'skyblue', 'mediumseagreen', 'gold']
 
-if uploaded_file is not None:
-    # Leer el archivo
-    if uploaded_file.name.endswith("xlsx"):
-        data = pd.read_excel(uploaded_file)
-    else:
-        data = pd.read_csv(uploaded_file)
+for i, (t, x, w, c) in enumerate(zip(tiempos, x_pos, anchos, colors_tiempo)):
+    ax.add_patch(patches.Rectangle((x, 8.5), w, 0.5, color=c, ec='black'))
+    ax.text(x + w / 2, 8.75, t, ha='center', va='center', fontsize=9, weight='bold')
 
-    # Mostrar los primeros datos y las columnas
-    st.write(data.head())
-    st.write("Columnas disponibles:", data.columns)
+sub_x = 0
+for i, sublist in enumerate(subtiempos):
+    dx = anchos[i] / len(sublist)
+    for sub in sublist:
+        ax.add_patch(patches.Rectangle((sub_x, 8), dx, 0.5, color='white', ec='black'))
+        ax.text(sub_x + dx / 2, 8.25, sub, ha='center', va='center', fontsize=8)
+        sub_x += dx
 
-    # Reemplazar los colores con sus valores hexadecimales
-    data['Color'] = data['Color'].apply(lambda x: color_map.get(x, '#808080'))  # Usar gris como valor por defecto
+# Unidades
+unidades = ["Pucara", "Sarayaquillo", "Cu", "Ra", "AC", "Cho", "Vi", "Ca", "Vi", "Ya", "Po", "Cha", "Ma", "Co"]
+pos_x = [0.5, 2.5, 4, 5, 5.5, 6, 6.5, 7, 7.5, 8, 9, 10, 11, 12]
+for x, u in zip(pos_x, unidades):
+    ax.text(x, 7.7, u, ha='center', va='center', fontsize=8)
 
-    # Crear la figura y los ejes
-    fig, ax = plt.subplots(figsize=(12, 10))
+# Eventos
+eventos = ["UNIDAD", "ROCA MADRE", "RESERVORIO", "SELLO", "SOTERRAMIENTO",
+           "TRAMPAS", "GEN / MIGR / ACUM", "PRESERVACION", "MOMENTO CRÍTICO"]
+y_labels = np.arange(7.2, 0, -0.8)
+for y, e in zip(y_labels, eventos):
+    ax.text(-0.5, y, e, ha='right', va='center', fontsize=9)
 
-    # Longitud fija para todas las barras (ahora reducida un poco más)
-    fixed_length = 4  # Aumento ligeramente el largo de las barras para más espacio
+barras = [
+    (4.8, 6.4, 2, 0.6, 'yellow'), (5.2, 5.6, 2.5, 0.6, 'peru'),
+    (6.5, 4.8, 3.5, 0.6, 'orange'), (9.5, 4.0, 3, 0.6, 'dodgerblue'),
+    (10, 3.2, 2, 0.6, 'red'), (11, 2.4, 3, 0.6, 'darkred'), (13, 1.6, 2, 0.6, 'lightblue')
+]
+for x, y, w, h, c in barras:
+    ax.add_patch(patches.Rectangle((x, y), w, h, color=c, ec='black'))
 
-    # Inicializar la posición de la barra (y-axis)
-    y_pos = np.arange(len(data))
+# Flecha momento crítico
+ax.annotate('', xy=(15.5, 1.0), xytext=(15.5, 0.5),
+            arrowprops=dict(facecolor='blue', edgecolor='black', width=6, headwidth=15))
 
-    # Dibujar las barras con longitud fija y color correspondiente, sin espacio entre barras
-    for i, row in data.iterrows():
-        ax.barh(y_pos[i], fixed_length, height=1.0, color=row['Color'], align='center')  # height=1.0 para eliminar espacio
+# Título
+ax.text(10, -0.3, "Fig. 4 - Sistema de Petróleo Chonta-Vivian", fontsize=11, ha='center')
 
-    # Ajustar la posición de las etiquetas de los intervalos para evitar solapamientos
-    for i, row in data.iterrows():
-        # Crear el intervalo de profundidad
-        depth_interval = f"{row['Profundidad Inicio (m)']} - {row['Profundidad Fin (m)']}"
-        
-        # Colocar el intervalo a la izquierda de la barra, más alejado
-        ax.text(-1.2, y_pos[i], depth_interval, va='center', fontsize=10, color='black')  # Desplazo más a la izquierda para evitar solapamiento
-        
-        # Agregar la descripción a la derecha de la barra
-        ax.text(fixed_length + 0.1, y_pos[i] - 0.2, row['Descripcion'], va='center', fontsize=8, color='black')
-
-    # Colocar el encabezado en la parte superior del gráfico utilizando plt.text()
-    plt.text(0.5, 1.02, "Profundidad (m)                  Litología                              Descripción            ", ha='center', va='center', fontsize=14, fontweight='bold', transform=ax.transAxes)
-
-    # Eliminar el nombre del eje Y
-    ax.set_ylabel('')  
-
-    # Eliminar los números y el nombre del eje horizontal (eje X)
-    ax.set_xticks([])  # Eliminar los ticks del eje X
-    ax.set_xlabel('')  # Eliminar el nombre del eje X
-
-    # Eliminar las etiquetas de los estratos en el eje Y
-    ax.set_yticks([])  # Eliminar las etiquetas del eje Y
-
-    # Eliminar las líneas de borde de la gráfica (spines)
-    for spine in ax.spines.values():
-        spine.set_visible(False)
-
-    # Invertir el eje y para que los estratos más profundos estén abajo
-    ax.invert_yaxis()
-
-    # Ajustar el layout y mostrar la gráfica
-    plt.tight_layout()
-    st.pyplot(fig)
+st.pyplot(fig)
