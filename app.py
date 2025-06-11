@@ -1,16 +1,15 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
-# Configuración
+# Configuración inicial
 st.set_page_config(layout="wide")
-st.title("Análisis Petrológico: Visualización de Litologías y Funciones")
+st.title("Análisis Petrológico: Litologías, Parámetros y Funciones")
 
-# Cargar el archivo Excel
+# Cargar archivo Excel
 df = pd.read_excel("CE_procesado.xlsx")
 
-# Calcular función dominante
+# Función dominante basada en >50 %
 def funcion_principal(row):
     funciones = {
         'Reservorio': row['% Reservorio'],
@@ -23,11 +22,11 @@ def funcion_principal(row):
 df['Función principal'] = df.apply(funcion_principal, axis=1)
 df_sig = df[df['Función principal'] != 'No significativa'].copy()
 
-# Renombrar 'Sentido de gradación' a 'Gradación'
+# Renombrar columna si es necesario
 if 'Sentido de gradación' in df_sig.columns:
     df_sig.rename(columns={'Sentido de gradación': 'Gradación'}, inplace=True)
 
-# Clasificar la permeabilidad (numérica) como categoría
+# Clasificar permeabilidad
 def clasificar_perm(valor):
     if valor >= 70:
         return 'Alta permeabilidad'
@@ -57,65 +56,34 @@ fig_scatter = px.scatter(
         'ESPESOR': 'Espesor (m)'
     }
 )
-
 st.plotly_chart(fig_scatter, use_container_width=True)
 
 # ------------------------------------------------
-# GRÁFICO 2: Sankey
+# GRÁFICOS 2–4: Barras horizontales por función
 # ------------------------------------------------
-st.markdown("## Gráfico 2: Diagrama Sankey - Transición hacia Función Petrológica")
+st.markdown("## Gráfico 2: Probabilidad de Función por Litología")
 
-etapas = ['Litología única', 'Gradación', 'Clasificación permeabilidad', 'Función principal']
-all_labels = []
-source = []
-target = []
-value = []
+# Función para graficar cada función petrológica
+def graficar_funcion(df, columna, titulo, color):
+    df_filtrado = df[df[columna] > 0].copy()
+    df_filtrado = df_filtrado.sort_values(by=columna, ascending=True)
 
-# Validar existencia de columnas y construir conexiones
-for i in range(len(etapas) - 1):
-    origen = etapas[i]
-    destino = etapas[i + 1]
-
-    if origen not in df_sig.columns or destino not in df_sig.columns:
-        st.warning(f"❗ Columna faltante: '{origen}' o '{destino}' no encontrada.")
-        continue
-
-    combinaciones = df_sig.groupby([origen, destino])['ESPESOR'].sum().reset_index(name='espesor_total')
-
-    for _, row in combinaciones.iterrows():
-        origen_val = row[origen]
-        destino_val = row[destino]
-        espesor = row['espesor_total']
-
-        if origen_val not in all_labels:
-            all_labels.append(origen_val)
-        if destino_val not in all_labels:
-            all_labels.append(destino_val)
-
-        source.append(all_labels.index(origen_val))
-        target.append(all_labels.index(destino_val))
-        value.append(espesor)
-
-# Crear gráfico Sankey
-fig_sankey = go.Figure(data=[go.Sankey(
-    node=dict(
-        pad=15,
-        thickness=20,
-        line=dict(color="black", width=0.5),
-        label=all_labels,
-        color="lightgray"
-    ),
-    link=dict(
-        source=source,
-        target=target,
-        value=value,
-        color="rgba(0, 128, 128, 0.4)"
+    fig = px.bar(
+        df_filtrado,
+        x=columna,
+        y='Litología única',
+        orientation='h',
+        title=titulo,
+        color_discrete_sequence=[color],
+        labels={columna: "Probabilidad (%)", 'Litología única': 'Litología (con profundidad)'}
     )
-)])
+    st.plotly_chart(fig, use_container_width=True)
 
-fig_sankey.update_layout(
-    title_text="Sankey: De Litología a Función Petrológica (ponderado por espesor)",
-    font_size=10
-)
+# Gráfico Roca Sello
+graficar_funcion(df, '% Sello', "Probabilidad de Función: Roca Sello", "orange")
 
-st.plotly_chart(fig_sankey, use_container_width=True)
+# Gráfico Roca Madre
+graficar_funcion(df, '% Roca Madre', "Probabilidad de Función: Roca Madre", "brown")
+
+# Gráfico Roca Reservorio
+graficar_funcion(df, '% Reservorio', "Probabilidad de Función: Roca Reservorio", "green")
