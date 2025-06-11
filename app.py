@@ -3,11 +3,11 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 
-# Configuración general
+# Configuración
 st.set_page_config(layout="wide")
-st.title("Análisis Petrológico: Litologías, Parámetros y Función")
+st.title("Análisis Petrológico: Visualización de Litologías y Funciones")
 
-# Cargar datos
+# Cargar el archivo Excel
 df = pd.read_excel("CE_procesado.xlsx")
 
 # Calcular función dominante
@@ -23,11 +23,11 @@ def funcion_principal(row):
 df['Función principal'] = df.apply(funcion_principal, axis=1)
 df_sig = df[df['Función principal'] != 'No significativa'].copy()
 
-# Renombrar 'Sentido de gradación' si es necesario
+# Renombrar 'Sentido de gradación' a 'Gradación'
 if 'Sentido de gradación' in df_sig.columns:
     df_sig.rename(columns={'Sentido de gradación': 'Gradación'}, inplace=True)
 
-# Clasificar permeabilidad en categorías
+# Clasificar la permeabilidad (numérica) como categoría
 def clasificar_perm(valor):
     if valor >= 70:
         return 'Alta permeabilidad'
@@ -38,9 +38,9 @@ def clasificar_perm(valor):
 
 df_sig['Clasificación permeabilidad'] = df_sig['Permeabilidad (1-100)'].apply(clasificar_perm)
 
-# ---------------------------------------------
-# 📈 Gráfico de dispersión
-# ---------------------------------------------
+# ------------------------------------------------
+# GRÁFICO 1: Dispersión Tamaño de grano vs Permeabilidad
+# ------------------------------------------------
 st.markdown("## Gráfico 1: Tamaño de Grano vs. Permeabilidad")
 
 fig_scatter = px.scatter(
@@ -50,19 +50,20 @@ fig_scatter = px.scatter(
     color='Función principal',
     size='ESPESOR',
     hover_name='Litología única',
-    title="Relación entre Tamaño de Grano y Permeabilidad (solo >50%)",
+    title="Relación entre Tamaño de Grano y Permeabilidad (funciones > 50%)",
     labels={
         'Tamaño de grano (1-100)': 'Tamaño de grano',
         'Permeabilidad (1-100)': 'Permeabilidad',
         'ESPESOR': 'Espesor (m)'
     }
 )
+
 st.plotly_chart(fig_scatter, use_container_width=True)
 
-# ---------------------------------------------
-# 🔀 Gráfico Sankey
-# ---------------------------------------------
-st.markdown("## Gráfico 2: Diagrama Sankey - De Litología a Función Petrológica")
+# ------------------------------------------------
+# GRÁFICO 2: Sankey
+# ------------------------------------------------
+st.markdown("## Gráfico 2: Diagrama Sankey - Transición hacia Función Petrológica")
 
 etapas = ['Litología única', 'Gradación', 'Clasificación permeabilidad', 'Función principal']
 all_labels = []
@@ -70,12 +71,14 @@ source = []
 target = []
 value = []
 
+# Validar existencia de columnas y construir conexiones
 for i in range(len(etapas) - 1):
     origen = etapas[i]
     destino = etapas[i + 1]
 
     if origen not in df_sig.columns or destino not in df_sig.columns:
-        continue  # Saltar si la columna no existe
+        st.warning(f"❗ Columna faltante: '{origen}' o '{destino}' no encontrada.")
+        continue
 
     combinaciones = df_sig.groupby([origen, destino])['ESPESOR'].sum().reset_index(name='espesor_total')
 
@@ -93,6 +96,7 @@ for i in range(len(etapas) - 1):
         target.append(all_labels.index(destino_val))
         value.append(espesor)
 
+# Crear gráfico Sankey
 fig_sankey = go.Figure(data=[go.Sankey(
     node=dict(
         pad=15,
@@ -110,7 +114,8 @@ fig_sankey = go.Figure(data=[go.Sankey(
 )])
 
 fig_sankey.update_layout(
-    title_text="Diagrama Sankey: De Litología a Función (ponderado por espesor)",
+    title_text="Sankey: De Litología a Función Petrológica (ponderado por espesor)",
     font_size=10
 )
+
 st.plotly_chart(fig_sankey, use_container_width=True)
