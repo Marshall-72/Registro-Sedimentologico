@@ -2,14 +2,14 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# Configuración inicial
+# Configuración general
 st.set_page_config(layout="wide")
 st.title("Análisis Petrológico: Litologías, Parámetros y Funciones")
 
 # Cargar archivo Excel
 df = pd.read_excel("CE_procesado.xlsx")
 
-# Función dominante basada en >50 %
+# Calcular función dominante (>50%)
 def funcion_principal(row):
     funciones = {
         'Reservorio': row['% Reservorio'],
@@ -22,7 +22,7 @@ def funcion_principal(row):
 df['Función principal'] = df.apply(funcion_principal, axis=1)
 df_sig = df[df['Función principal'] != 'No significativa'].copy()
 
-# Renombrar columna si es necesario
+# Renombrar si es necesario
 if 'Sentido de gradación' in df_sig.columns:
     df_sig.rename(columns={'Sentido de gradación': 'Gradación'}, inplace=True)
 
@@ -37,9 +37,9 @@ def clasificar_perm(valor):
 
 df_sig['Clasificación permeabilidad'] = df_sig['Permeabilidad (1-100)'].apply(clasificar_perm)
 
-# ------------------------------------------------
-# GRÁFICO 1: Dispersión Tamaño de grano vs Permeabilidad
-# ------------------------------------------------
+# ------------------------------
+# GRÁFICO 1: Dispersión
+# ------------------------------
 st.markdown("## Gráfico 1: Tamaño de Grano vs. Permeabilidad")
 
 fig_scatter = px.scatter(
@@ -58,14 +58,24 @@ fig_scatter = px.scatter(
 )
 st.plotly_chart(fig_scatter, use_container_width=True)
 
-# ------------------------------------------------
-# GRÁFICOS 2–4: Barras horizontales por función
-# ------------------------------------------------
+# ------------------------------
+# GRÁFICOS 2–4: Función por litología
+# ------------------------------
 st.markdown("## Gráfico 2: Probabilidad de Función por Litología")
 
-# Función para graficar cada función petrológica
 def graficar_funcion(df, columna, titulo, color):
+    if columna not in df.columns:
+        st.warning(f"❗ La columna '{columna}' no existe.")
+        return
+    if 'Litología única' not in df.columns:
+        st.warning("❗ La columna 'Litología única' no existe.")
+        return
+
     df_filtrado = df[df[columna] > 0].copy()
+    if df_filtrado.empty:
+        st.info(f"No hay registros con {columna} > 0.")
+        return
+
     df_filtrado = df_filtrado.sort_values(by=columna, ascending=True)
 
     fig = px.bar(
