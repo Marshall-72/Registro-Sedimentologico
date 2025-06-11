@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 st.set_page_config(layout="wide")
 st.title("Análisis Petrológico: Tamaño de Grano, Permeabilidad y Función Litológica")
@@ -13,7 +12,7 @@ Este panel interactivo muestra dos visualizaciones clave para comprender el comp
 
 1. Un **gráfico de dispersión** que relaciona el **tamaño de grano** con la **permeabilidad**, codificado por la función dominante de cada estrato (reservorio, sello o roca generadora) y con tamaño proporcional al espesor.
 
-2. Un **gráfico radar** que permite comparar visualmente la proporción relativa de función petrológica (% de probabilidad de ser reservorio, sello o generadora) para cada unidad litológica.
+2. Un **gráfico de barras agrupadas** que permite comparar visualmente la proporción relativa de función petrológica (% de probabilidad de ser reservorio, sello o generadora) para cada unidad litológica.
 
 ---
 
@@ -21,7 +20,7 @@ Este panel interactivo muestra dos visualizaciones clave para comprender el comp
 
 - Los **mejores reservorios** se encuentran en zonas de **alta permeabilidad y gran tamaño de grano**
 - Las **rocas sello y generadoras** se agrupan en sectores de baja permeabilidad y grano fino
-- La representación radar permite detectar litologías multifuncionales o especializadas por su distribución triangular
+- La comparación por barras permite distinguir litologías multifuncionales o especializadas
 """)
 
 # 📥 Cargar datos
@@ -42,7 +41,7 @@ if 'Función principal' not in df.columns:
 
 df_sig = df[df['Función principal'] != 'No significativa']
 
-# 📊 Gráfico Scatter
+# 📊 Gráfico de dispersión
 fig = px.scatter(
     df_sig,
     x='Tamaño de grano (1-100)',
@@ -59,26 +58,26 @@ fig = px.scatter(
 )
 st.plotly_chart(fig, use_container_width=True)
 
-# 📈 Gráfico Radar
-st.markdown("## Comparación de Funciones Petrológicas por Litología")
+# 📊 Gráfico de barras agrupadas
+st.markdown("## Porcentaje de Función Petrológica por Litología")
 
-df_radar = df_sig[['Litología única', '% Reservorio', '% Sello', '% Roca Madre']]
-
-fig_radar = go.Figure()
-for i, row in df_radar.iterrows():
-    fig_radar.add_trace(go.Scatterpolar(
-        r=[row['% Reservorio'], row['% Sello'], row['% Roca Madre']],
-        theta=['Reservorio', 'Sello', 'Roca Generadora'],
-        fill='toself',
-        name=row['Litología única']
-    ))
-
-fig_radar.update_layout(
-    title="Distribución de Funciones Petrológicas por Litología",
-    polar=dict(
-        radialaxis=dict(visible=True, range=[0, 100])
-    ),
-    showlegend=True
+df_bar = df_sig[['Litología única', '% Reservorio', '% Sello', '% Roca Madre']]
+df_bar = df_bar.melt(
+    id_vars='Litología única',
+    value_vars=['% Reservorio', '% Sello', '% Roca Madre'],
+    var_name='Función',
+    value_name='Porcentaje'
 )
 
-st.plotly_chart(fig_radar, use_container_width=True)
+fig_bar = px.bar(
+    df_bar,
+    x='Litología única',
+    y='Porcentaje',
+    color='Función',
+    barmode='group',
+    title="Comparación de Funciones Petrológicas por Litología",
+    labels={'Litología única': 'Litología'}
+)
+
+fig_bar.update_layout(xaxis_tickangle=-45)
+st.plotly_chart(fig_bar, use_container_width=True)
